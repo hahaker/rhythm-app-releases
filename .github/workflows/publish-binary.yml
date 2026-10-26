@@ -1,0 +1,24 @@
+name: Publish verified Android 1.1.2
+on:
+  push:
+    branches: ['binary-upload-1-1-2-*']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble and verify APK
+        run: |
+          cat .release-upload/part-* > rhythm-android-1.1.2.apk
+          echo 'd17f5df02c4d174a4f7528d8e4ace0b0b369d98ca7b2d7557b74a6d63165f786  rhythm-android-1.1.2.apk' > SHA256SUMS-1.1.2.txt
+          sha256sum -c SHA256SUMS-1.1.2.txt
+      - name: Publish verified release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error --retry 2 --retry-all-errors --max-time 180 -H "Authorization: Bearer $GH_TOKEN" -H 'Content-Type: application/octet-stream' --data-binary @rhythm-android-1.1.2.apk 'https://uploads.github.com/repos/hahaker/rhythm-app-releases/releases/424667915/assets?name=rhythm-android-1.1.2.apk' > /dev/null
+          curl --fail --silent --show-error --retry 2 --retry-all-errors --max-time 60 -H "Authorization: Bearer $GH_TOKEN" -H 'Content-Type: text/plain' --data-binary @SHA256SUMS-1.1.2.txt 'https://uploads.github.com/repos/hahaker/rhythm-app-releases/releases/424667915/assets?name=SHA256SUMS-1.1.2.txt' > /dev/null
+          gh api --method PATCH repos/hahaker/rhythm-app-releases/releases/424667915 -F draft=false -F prerelease=true --silent
