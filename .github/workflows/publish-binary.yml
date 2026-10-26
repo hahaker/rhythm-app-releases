@@ -19,6 +19,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api --hostname uploads.github.com --method POST '/repos/hahaker/rhythm-app-releases/releases/424289934/assets?name=rhythm-android-1.1.1.apk' --input rhythm-android-1.1.1.apk -H 'Content-Type: application/octet-stream' --silent
-          gh api --hostname uploads.github.com --method POST '/repos/hahaker/rhythm-app-releases/releases/424289934/assets?name=SHA256SUMS-1.1.1.txt' --input SHA256SUMS-1.1.1.txt -H 'Content-Type: text/plain' --silent
+          curl --fail --silent --show-error --retry 3 --request POST --header "Authorization: Bearer $GH_TOKEN" --header "Content-Type: application/octet-stream" --data-binary @rhythm-android-1.1.1.apk "https://uploads.github.com/repos/hahaker/rhythm-app-releases/releases/424289934/assets?name=rhythm-android-1.1.1.apk" > /tmp/rhythm-android-1.1.1.apk.json
+          curl --fail --silent --show-error --retry 3 --request POST --header "Authorization: Bearer $GH_TOKEN" --header "Content-Type: application/octet-stream" --data-binary @SHA256SUMS-1.1.1.txt "https://uploads.github.com/repos/hahaker/rhythm-app-releases/releases/424289934/assets?name=SHA256SUMS-1.1.1.txt" > /tmp/SHA256SUMS-1.1.1.txt.json
           gh api --method PATCH repos/hahaker/rhythm-app-releases/releases/424289934 -F draft=false -F prerelease=true --silent
